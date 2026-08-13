@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ContactoRow } from "@/lib/database.types";
 
 export function SiteFooter({ contacto }: { contacto: ContactoRow }) {
@@ -19,9 +20,10 @@ export function SiteFooter({ contacto }: { contacto: ContactoRow }) {
       <div className="mx-auto max-w-[1180px] px-5">
         <div className="grid gap-10 md:grid-cols-3">
           <div>
-            <strong className="mb-2 block font-display text-lg text-white">
-              Valle Paraíso Bilingüe
-            </strong>
+            <div className="mb-3 flex items-center gap-3">
+              <Image src="/logo.png" alt="" width={36} height={36} className="rounded-full" />
+              <strong className="font-display text-lg text-white">Valle Paraíso Bilingüe</strong>
+            </div>
             <p className="max-w-xs text-sm leading-relaxed text-white/60">
               Programa de fortalecimiento de competencias digitales para docentes de inglés del
               departamento del Valle del Cauca.

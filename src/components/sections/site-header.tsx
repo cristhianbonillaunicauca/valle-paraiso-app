@@ -14,7 +14,7 @@ const LINKS = [
   { href: "#memorias", label: "Memorias" },
 ];
 
-export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
+export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -34,11 +34,7 @@ export function SiteHeader({ logoUrl }: { logoUrl?: string | null }) {
     >
       <nav className="mx-auto flex max-w-[1180px] items-center justify-between px-5 py-3.5">
         <a href="#top" className="flex items-center gap-3">
-          {logoUrl ? (
-            <Image src={logoUrl} alt="" width={40} height={40} className="rounded-md" unoptimized />
-          ) : (
-            <div className="h-10 w-10 rounded-md bg-navy" />
-          )}
+          <Image src="/logo.png" alt="Valle Paraíso Bilingüe" width={40} height={40} className="rounded-full" priority />
           <span className="leading-tight">
             <strong className="block font-display text-base text-navy">Valle Paraíso Bilingüe</strong>
             <span className="block font-mono text-[11px] text-muted">Taller 1 de 5</span>
