@@ -51,13 +51,21 @@ export function CronogramaChart({ cronograma }: { cronograma: CronogramaRow[] })
     };
   });
 
+  // El eje X representa la hora real del día, no la duración: cada barra
+  // "flota" a partir de su hora de inicio usando una barra invisible
+  // (dataKey="inicio") apilada debajo de la barra visible (dataKey="duracion").
+  // Sin este apilamiento, recharts dibuja toda barra desde cero y el eje
+  // termina mostrando "12:xx a.m." (minutos de duración mal formateados
+  // como hora del día) en vez de la hora real del bloque.
+  const domainMin = Math.max(0, Math.floor(points[0].minutes / 30) * 30 - 15);
+
   return (
     <div className="rounded-2xl border border-line bg-card p-5 md:p-6">
       <ResponsiveContainer width="100%" height={Math.max(220, data.length * 44)}>
         <BarChart data={data} layout="vertical" barCategoryGap={10} margin={{ left: 8, right: 24 }}>
           <XAxis
             type="number"
-            domain={["dataMin", "dataMax"]}
+            domain={[domainMin, "dataMax"]}
             tickFormatter={(v: number) => formatMinutes(v)}
             tick={{ fontSize: 11, fill: "#5B6478" }}
             axisLine={{ stroke: "#E1E8EA" }}
@@ -73,7 +81,7 @@ export function CronogramaChart({ cronograma }: { cronograma: CronogramaRow[] })
           />
           <Tooltip
             cursor={{ fill: "rgba(29,48,96,0.06)" }}
-            formatter={(value) => [`${Number(value)} min`, "Duración"]}
+            formatter={(value, name) => (name === "inicio" ? null : [`${Number(value)} min`, "Duración"])}
             labelFormatter={(_, payload) =>
               payload?.[0] ? `${payload[0].payload.label} · ${formatMinutes(payload[0].payload.inicio)}` : ""
             }
@@ -84,7 +92,8 @@ export function CronogramaChart({ cronograma }: { cronograma: CronogramaRow[] })
               fontFamily: "var(--font-body)",
             }}
           />
-          <Bar dataKey="duracion" radius={[0, 8, 8, 0]} isAnimationActive maxBarSize={26}>
+          <Bar dataKey="inicio" name="inicio" stackId="tiempo" fill="transparent" isAnimationActive={false} />
+          <Bar dataKey="duracion" name="duracion" stackId="tiempo" radius={[0, 8, 8, 0]} isAnimationActive maxBarSize={26}>
             {data.map((d, i) => (
               <Cell key={i} fill={d.color} />
             ))}

@@ -37,13 +37,18 @@ insert into pilares (titulo, descripcion, orden) values
 -- Cronograma
 -- -------------------------------------------------------------------------
 insert into cronograma (hora, label, tipo, orden) values
-  ('8:00',  'Registro',    'neutro', 1),
-  ('8:30',  'Plenaria',    'navy',   2),
-  ('10:05', 'Rotación 1',  'teal',   3),
-  ('11:10', 'Rotación 2',  'orange', 4),
-  ('1:10',  'Rotación 3',  'blue',   5),
-  ('2:15',  'Rotación 4',  'red',    6),
-  ('3:15',  'Cierre',      'neutro', 7);
+  ('8:00',  'Registro de asistencia - Refrigerio AM',   'neutro', 1),
+  ('8:30',  'Plenaria',                                 'navy',   2),
+  ('10:00', 'Desplazamiento',                           'neutro', 3),
+  ('10:05', 'Tiempo de sala – Sesión 1',                'teal',   4),
+  ('11:05', 'Desplazamiento',                           'neutro', 5),
+  ('11:10', 'Tiempo de sala – Sesión 2',                'orange', 6),
+  ('12:10', 'Almuerzo',                                 'neutro', 7),
+  ('1:10',  'Tiempo de sala – Sesión 3',                'blue',   8),
+  ('2:10',  'Desplazamiento',                           'neutro', 9),
+  ('2:15',  'Tiempo de sala – Sesión 4',                'red',    10),
+  ('3:15',  'Plenaria de cierre',                       'navy',   11),
+  ('3:40',  'Aplicación de la encuesta de satisfacción','neutro', 12);
 
 -- -------------------------------------------------------------------------
 -- Las 4 salas
@@ -64,7 +69,7 @@ insert into equipo (rol_tipo, sala, color, nombre, rol_o_especialidad, bio, foto
   ('conferencista', null, null,
    'Cristhian Hernán Bonilla Gutiérrez',
    'Conferencista Principal',
-   'Docente universitario e investigador. Especialista en TIC para la Innovación Educativa. Magíster en Educación y Tecnología Digital. PhD© en Educación e Innovación. Diseñador instruccional y consultor en innovación educativa, tecnologías digitales e inteligencia artificial aplicada a la educación.',
+   'Docente universitario e investigador. Especialista en TIC para la Innovación Educativa. Magister en Educación y Tecnología Digital. PhD© en Educación e Innovación. Diseñador instruccional y consultor en innovación educativa, tecnologías digitales e inteligencia artificial aplicada a la educación.',
    null, 1),
   ('tallerista', 1, 'teal',
    'Margarita Elizabeth Mazabuel Collazos',
