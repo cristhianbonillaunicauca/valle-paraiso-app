@@ -1,6 +1,7 @@
 import { getSiteData } from "@/lib/queries";
 import { SiteHeader } from "@/components/sections/site-header";
 import { Hero } from "@/components/sections/hero";
+import { PhotoCarousel } from "@/components/sections/photo-carousel";
 import { ProgramaSection } from "@/components/sections/programa-section";
 import { SalasSection } from "@/components/sections/salas-section";
 import { EquipoSection } from "@/components/sections/equipo-section";
@@ -45,6 +46,7 @@ export default async function Home() {
       <SiteHeader />
       <main>
         <Hero pilares={data.pilares} cronograma={data.cronograma} />
+        <PhotoCarousel />
         <ProgramaSection programa={data.programa} pilares={data.pilares} cronograma={data.cronograma} />
         <SalasSection salas={data.salas} />
         <EquipoSection equipo={data.equipo} />
