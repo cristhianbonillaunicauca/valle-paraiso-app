@@ -53,7 +53,7 @@ export function PhotoCarousel() {
       <div className="mx-auto max-w-[1180px] px-5">
         <Reveal>
           <div
-            className="group relative aspect-[21/9] w-full overflow-hidden rounded-2xl border border-line bg-navy-deep shadow-[0_24px_48px_-16px_rgba(14,25,48,.28)]"
+            className="group relative aspect-[3/1] w-full overflow-hidden rounded-2xl border border-line bg-navy-deep shadow-[0_24px_48px_-16px_rgba(14,25,48,.28)]"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
             role="region"
