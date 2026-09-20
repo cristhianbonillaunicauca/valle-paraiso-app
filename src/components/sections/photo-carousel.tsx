@@ -32,7 +32,7 @@ function driveThumb(id: string, width = 1600) {
   return `https://drive.google.com/thumbnail?id=${id}&sz=w${width}`;
 }
 
-const INTERVAL_MS = 5000;
+const INTERVAL_MS = 3000;
 
 export function PhotoCarousel() {
   const [index, setIndex] = useState(0);
@@ -49,7 +49,7 @@ export function PhotoCarousel() {
   if (PHOTOS.length === 0) return null;
 
   return (
-    <section className="pb-16 md:pb-24">
+    <section className="pt-10 pb-16 md:pt-14 md:pb-24">
       <div className="mx-auto max-w-[1180px] px-5">
         <Reveal>
           <div
