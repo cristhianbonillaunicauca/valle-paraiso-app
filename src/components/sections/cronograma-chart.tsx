@@ -66,6 +66,7 @@ export function CronogramaChart({ cronograma }: { cronograma: CronogramaRow[] })
           <XAxis
             type="number"
             domain={[domainMin, "dataMax"]}
+            allowDataOverflow
             tickFormatter={(v: number) => formatMinutes(v)}
             tick={{ fontSize: 11, fill: "#5B6478" }}
             axisLine={{ stroke: "#E1E8EA" }}
