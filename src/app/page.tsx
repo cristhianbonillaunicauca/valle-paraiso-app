@@ -47,7 +47,7 @@ export default async function Home() {
       <main>
         <PhotoCarousel />
         <Hero pilares={data.pilares} cronograma={data.cronograma} />
-        <ProgramaSection programa={data.programa} pilares={data.pilares} cronograma={data.cronograma} />
+        <ProgramaSection programa={data.programa} pilares={data.pilares} />
         <SalasSection salas={data.salas} />
         <EquipoSection equipo={data.equipo} />
         <DocumentosSection documentos={data.documentos} />

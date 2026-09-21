@@ -1,15 +1,12 @@
-import type { CronogramaRow, PilarRow, ProgramaRow } from "@/lib/database.types";
+import type { PilarRow, ProgramaRow } from "@/lib/database.types";
 import { Reveal } from "@/components/reveal";
-import { CronogramaChart } from "@/components/sections/cronograma-chart";
 
 export function ProgramaSection({
   programa,
   pilares,
-  cronograma,
 }: {
   programa: ProgramaRow;
   pilares: PilarRow[];
-  cronograma: CronogramaRow[];
 }) {
   return (
     <section id="programa" className="py-20 md:py-28">
@@ -40,16 +37,6 @@ export function ProgramaSection({
             </div>
           </Reveal>
         </div>
-
-        {cronograma.length > 0 && (
-          <Reveal delay={0.15} className="mt-14">
-            <div className="mb-4 flex items-baseline justify-between gap-4">
-              <h3 className="font-display text-xl text-navy">Cronograma visual del taller</h3>
-              <span className="font-mono text-xs text-muted">duración estimada por bloque</span>
-            </div>
-            <CronogramaChart cronograma={cronograma} />
-          </Reveal>
-        )}
       </div>
     </section>
   );
