@@ -52,6 +52,7 @@ export function SiteHeader() {
           <li>
             <a
               href="#contacto"
+              style={{ color: "#ffffff" }}
               className="rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
             >
               Contacto

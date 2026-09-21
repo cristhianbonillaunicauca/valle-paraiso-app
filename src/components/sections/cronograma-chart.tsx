@@ -51,13 +51,19 @@ export function CronogramaChart({ cronograma }: { cronograma: CronogramaRow[] })
     };
   });
 
-  // El eje X representa la hora real del día, no la duración: cada barra
-  // "flota" a partir de su hora de inicio usando una barra invisible
-  // (dataKey="inicio") apilada debajo de la barra visible (dataKey="duracion").
-  // Sin este apilamiento, recharts dibuja toda barra desde cero y el eje
-  // termina mostrando "12:xx a.m." (minutos de duración mal formateados
-  // como hora del día) en vez de la hora real del bloque.
-  const domainMin = Math.max(0, Math.floor(points[0].minutes / 30) * 30 - 15);
+  // El eje X representa la hora real del día. Se calculan el rango y las
+  // marcas (ticks) explícitamente en vez de dejar que Recharts las genere
+  // solo: por defecto, para ejes numéricos, Recharts "redondea" (nice()) el
+  // dominio a números convenientes, y en un bar chart apilado ese redondeo
+  // termina arrastrando el mínimo hasta 0 (12:00 a.m.) sin importar el
+  // domain o el allowDataOverflow que se le pase.
+  const domainMin = points[0].minutes;
+  const lastPoint = data[data.length - 1];
+  const domainMax = lastPoint.inicio + lastPoint.duracion;
+  const TICK_COUNT = 5;
+  const ticks = Array.from({ length: TICK_COUNT }, (_, i) =>
+    Math.round(domainMin + (i * (domainMax - domainMin)) / (TICK_COUNT - 1))
+  );
 
   return (
     <div className="rounded-2xl border border-line bg-card p-5 md:p-6">
@@ -65,7 +71,8 @@ export function CronogramaChart({ cronograma }: { cronograma: CronogramaRow[] })
         <BarChart data={data} layout="vertical" barCategoryGap={10} margin={{ left: 8, right: 24 }}>
           <XAxis
             type="number"
-            domain={[domainMin, "dataMax"]}
+            domain={[domainMin, domainMax]}
+            ticks={ticks}
             allowDataOverflow
             tickFormatter={(v: number) => formatMinutes(v)}
             tick={{ fontSize: 11, fill: "#5B6478" }}
