@@ -1,18 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Reveal } from "@/components/reveal";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /**
- * Las fotos se sirven directo desde Google Drive (endpoint público de
- * miniaturas: drive.google.com/thumbnail?id=...), no están copiadas al
- * repositorio. Es la forma más rápida de tenerlas en el sitio sin pasar
- * cada imagen por el pipeline de build, pero depende de que cada archivo
- * siga compartido como "Cualquiera con el enlace" en Drive. Si más adelante
- * se quiere independencia de Drive, lo ideal es moverlas a
- * `public/fotos/` (o al bucket "docs" de Supabase Storage) y cambiar
- * `src` por la ruta local.
+ * Fotos servidas desde Google Drive (miniaturas públicas). Cambios frente a
+ * la versión anterior: ya no está encima del título (no compite con el
+ * contenido principal), carga las imágenes de forma diferida, tiene botón de
+ * pausa (WCAG 2.2.2) y no avanza sola si el usuario pidió reducir movimiento.
  */
 const PHOTOS: { id: string; alt: string }[] = [
   { id: "169GsSb-AJxDIdryLZEhMgWazEGj9GeRp", alt: "Equipo del proyecto Valle Paraíso Bilingüe" },
@@ -28,67 +24,85 @@ const PHOTOS: { id: string; alt: string }[] = [
   { id: "1y6URX84NUCD_adZJ2nsr8tnVlaBi3MpH", alt: "Docentes en formación" },
 ];
 
-function driveThumb(id: string, width = 1600) {
+function driveThumb(id: string, width = 1400) {
   return `https://drive.google.com/thumbnail?id=${id}&sz=w${width}`;
 }
 
-const INTERVAL_MS = 3000;
+const INTERVAL_MS = 5000;
 
 export function PhotoCarousel() {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const [hover, setHover] = useState(false);
+  // Índices ya visitados: solo esos se montan (carga diferida).
+  const [seen, setSeen] = useState<Set<number>>(() => new Set([0, 1]));
 
   useEffect(() => {
-    if (paused || PHOTOS.length < 2) return;
-    const timer = setInterval(() => {
-      setIndex((i) => (i + 1) % PHOTOS.length);
-    }, INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [paused]);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPlaying(false);
+    }
+  }, []);
 
-  if (PHOTOS.length === 0) return null;
+  useEffect(() => {
+    if (!playing || hover) return;
+    const t = setInterval(() => setIndex((i) => (i + 1) % PHOTOS.length), INTERVAL_MS);
+    return () => clearInterval(t);
+  }, [playing, hover]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSeen((prev) => {
+      const next = (index + 1) % PHOTOS.length;
+      if (prev.has(index) && prev.has(next)) return prev;
+      return new Set([...prev, index, next]);
+    });
+  }, [index]);
+
+  const go = (d: number) => setIndex((i) => (i + d + PHOTOS.length) % PHOTOS.length);
 
   return (
-    <section className="pt-10 pb-16 md:pt-14 md:pb-24">
-      <div className="mx-auto max-w-[1180px] px-5">
-        <Reveal>
-          <div
-            className="group relative aspect-[3/1] w-full overflow-hidden rounded-2xl border border-line bg-navy-deep shadow-[0_24px_48px_-16px_rgba(14,25,48,.28)]"
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-            role="region"
-            aria-label="Fotos del proyecto Valle Paraíso Bilingüe"
-          >
-            <AnimatePresence initial={false}>
-              <motion.img
-                key={PHOTOS[index].id}
-                src={driveThumb(PHOTOS[index].id)}
-                alt={PHOTOS[index].alt}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </AnimatePresence>
-
-            {/* Puntos de navegación manual */}
-            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-              {PHOTOS.map((p, i) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  aria-label={`Ver foto ${i + 1}`}
-                  onClick={() => setIndex(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    i === index ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/80"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </Reveal>
+    <div
+      className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-line bg-navy-deep md:aspect-[21/9]"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      role="region"
+      aria-roledescription="carrusel"
+      aria-label="Fotografías del Taller 1"
+    >
+      {PHOTOS.map((p, i) =>
+        seen.has(i) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={p.id}
+            src={driveThumb(p.id)}
+            alt={i === index ? p.alt : ""}
+            aria-hidden={i !== index}
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
+            className={cn(
+              "absolute inset-0 h-full w-full object-cover transition-opacity duration-700",
+              i === index ? "opacity-100" : "opacity-0"
+            )}
+          />
+        ) : null
+      )}
+      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-navy-deep/70 to-transparent p-3">
+        <div className="flex gap-1.5">
+          <button type="button" onClick={() => go(-1)} aria-label="Foto anterior" className="grid h-10 w-10 place-items-center rounded-full bg-white/90 text-navy hover:bg-white">
+            <ChevronLeft size={18} />
+          </button>
+          <button type="button" onClick={() => go(1)} aria-label="Foto siguiente" className="grid h-10 w-10 place-items-center rounded-full bg-white/90 text-navy hover:bg-white">
+            <ChevronRight size={18} />
+          </button>
+          <button type="button" onClick={() => setPlaying((v) => !v)} aria-label={playing ? "Pausar carrusel" : "Reproducir carrusel"} className="grid h-10 w-10 place-items-center rounded-full bg-white/90 text-navy hover:bg-white">
+            {playing ? <Pause size={16} /> : <Play size={16} />}
+          </button>
+        </div>
+        <span className="rounded-full bg-navy-deep/60 px-3 py-1 font-mono text-xs text-white" aria-live="polite">
+          {index + 1} / {PHOTOS.length}
+        </span>
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,35 +1,21 @@
-"use client";
-
-import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
-const variants: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 },
-};
-
+/**
+ * Aparición suave al hacer scroll usando solo CSS (ver `.reveal` en
+ * globals.css). A diferencia de la versión anterior con Framer Motion, el
+ * contenido es visible desde el primer render: no depende de JavaScript,
+ * no penaliza el LCP y respeta "reducir movimiento".
+ */
 export function Reveal({
   children,
-  delay = 0,
   className,
-  as = "div",
+  as: Tag = "div",
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
-  as?: "div" | "li";
+  as?: "div" | "li" | "section";
 }) {
-  const MotionTag = as === "li" ? motion.li : motion.div;
-  return (
-    <MotionTag
-      className={className}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "0px 0px -80px 0px" }}
-      variants={variants}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </MotionTag>
-  );
+  return <Tag className={cn("reveal", className)}>{children}</Tag>;
 }

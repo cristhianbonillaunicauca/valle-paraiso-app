@@ -17,6 +17,22 @@ export const COLORS = {
 
 export type ColorKey = keyof typeof COLORS;
 
+/** Variantes con contraste AA para texto de color o fondos con texto blanco. */
+export const INK: Record<string, string> = {
+  navy: "#1D3060",
+  teal: "#00756C",
+  orange: "#9A5B00",
+  blue: "#0A5A8C",
+  red: "#B02A14",
+  gold: "#8A6508",
+  neutro: "#4E5669",
+};
+
+/** Hex con contraste AA para una clave de color. */
+export function inkHex(key?: string | null): string {
+  return (key && INK[key]) || INK.navy;
+}
+
 /** Devuelve el hex de una clave de color; si no existe, cae en navy. */
 export function colorHex(key?: string | null): string {
   if (key && key in COLORS) return COLORS[key as ColorKey];

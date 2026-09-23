@@ -9,6 +9,13 @@
   --red: #D6371E;
   --gold: #B8860B;
 
+  /* Variantes "ink" con contraste AA (>= 4.5:1) sobre blanco y sobre el
+     fondo paper. Se usan para texto de color y para fondos con texto blanco. */
+  --teal-ink: #00756C;
+  --orange-ink: #9A5B00;
+  --blue-ink: #0A5A8C;
+  --red-ink: #B02A14;
+
   --paper: #F6FAFA;
   --paper-deep: #EEF4F4;
   --card: #FFFFFF;
@@ -28,6 +35,10 @@
   --color-blue: var(--blue);
   --color-red: var(--red);
   --color-gold: var(--gold);
+  --color-teal-ink: var(--teal-ink);
+  --color-orange-ink: var(--orange-ink);
+  --color-blue-ink: var(--blue-ink);
+  --color-red-ink: var(--red-ink);
 
   --color-paper: var(--paper);
   --color-paper-deep: var(--paper-deep);
@@ -86,3 +97,66 @@ a { color: inherit; }
   background: var(--teal);
   color: #fff;
 }
+
+/* Foco visible y consistente (WCAG 2.4.7 / 2.4.11). */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--teal-ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Enlace "Saltar al contenido". */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  background: var(--navy);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: top .15s ease;
+}
+.skip-link:focus { top: 12px; }
+
+/* Aparición suave al hacer scroll, SOLO donde el navegador soporta
+   animaciones ligadas al scroll. El contenido siempre es visible por
+   defecto (no depende de JavaScript y no retrasa el LCP). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 30%;
+    }
+  }
+}
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-fade-up { animation: fade-up .35s cubic-bezier(.22,1,.36,1) both; }
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--paper-deep) 0px, #e4ecec 80px, var(--paper-deep) 160px);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
+
+/* Tarjeta con elevación suave al pasar el cursor. */
+.lift { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.lift:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -12px rgba(14,25,48,.22); }
+
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
