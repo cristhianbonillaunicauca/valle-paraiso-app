@@ -125,3 +125,47 @@ export async function getSiteData(): Promise<SiteData> {
     contacto: contactoRes.data ?? EMPTY_CONTACTO,
   };
 }
+
+/** Solo la fila de contacto (para el pie de página en todas las rutas). */
+export async function getContacto(): Promise<ContactoRow> {
+  try {
+    const supabase = getSupabaseServerClient();
+    const { data } = await supabase.from("contacto").select("*").eq("id", 1).maybeSingle();
+    return data ?? EMPTY_CONTACTO;
+  } catch {
+    return EMPTY_CONTACTO;
+  }
+}
+
+/** Total real de descargas registradas (null si no se pudo consultar). */
+export async function getTotalDescargas(): Promise<number | null> {
+  try {
+    const supabase = getSupabaseServerClient();
+    const { count, error } = await supabase.from("descargas").select("*", { count: "exact", head: true });
+    return error ? null : (count ?? null);
+  } catch {
+    return null;
+  }
+}
+
+/** Versión segura de getSiteData: nunca lanza (útil en rutas secundarias). */
+export async function getSiteDataSafe(): Promise<SiteData | null> {
+  try {
+    return await getSiteData();
+  } catch {
+    return null;
+  }
+}
+
+/** Conteo de descargas por recurso: { "banco-1": 104, ... } (null si falla). */
+export async function getConteosDescargas(): Promise<Record<string, number> | null> {
+  try {
+    const supabase = getSupabaseServerClient();
+    const { data, error } = await supabase.from("descargas_conteo").select("*");
+    if (error) return null;
+    const rows = (data ?? []) as unknown as { recurso_tipo: string; recurso_id: number; total: number }[];
+    return Object.fromEntries(rows.map((r) => [`${r.recurso_tipo}-${r.recurso_id}`, r.total]));
+  } catch {
+    return null;
+  }
+}

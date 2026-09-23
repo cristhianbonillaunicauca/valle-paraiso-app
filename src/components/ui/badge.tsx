@@ -10,8 +10,9 @@ const badgeVariants = cva(
       variant: {
         default: "border-transparent bg-navy text-white",
         outline: "border-line-strong text-navy bg-transparent",
-        success: "border-transparent bg-teal/15 text-teal",
-        pending: "border-transparent bg-orange/15 text-orange",
+        success: "border-transparent bg-teal/15 text-teal-ink",
+        pending: "border-transparent bg-orange/15 text-orange-ink",
+        neutral: "border-line-strong bg-paper-deep text-muted",
       },
     },
     defaultVariants: { variant: "default" },
