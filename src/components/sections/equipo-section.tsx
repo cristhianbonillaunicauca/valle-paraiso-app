@@ -1,5 +1,5 @@
 import type { EquipoRow } from "@/lib/database.types";
-import { colorHex } from "@/lib/colors";
+import { inkHex } from "@/lib/colors";
 import { Reveal } from "@/components/reveal";
 import { Avatar } from "@/components/avatar";
 
@@ -10,14 +10,14 @@ export function EquipoSection({ equipo }: { equipo: EquipoRow[] }) {
     .sort((a, b) => (a.sala ?? 0) - (b.sala ?? 0));
 
   return (
-    <section id="equipo" className="py-20 md:py-28">
+    <section id="equipo" aria-labelledby="equipo-title" className="scroll-mt-20 py-16 md:py-24">
       <div className="mx-auto max-w-[1180px] px-5">
         <Reveal className="mb-12 max-w-2xl">
-          <div className="mb-3 font-mono text-xs font-semibold uppercase tracking-wide text-teal">
+          <div className="mb-3 font-mono text-xs font-semibold uppercase tracking-wide text-teal-ink">
             Equipo académico
           </div>
-          <h2 className="mb-3 text-[clamp(24px,3vw,32px)] font-semibold text-navy">
-            Quiénes lideran el Taller 1
+          <h2 id="equipo-title" className="mb-3 text-[clamp(24px,3vw,32px)] font-semibold text-navy">
+            Equipo académico del Taller 1
           </h2>
           <p className="text-[15px] leading-relaxed text-muted">
             Un conferencista principal y cuatro talleristas especializados, uno por cada sala
@@ -31,7 +31,7 @@ export function EquipoSection({ equipo }: { equipo: EquipoRow[] }) {
               <Avatar name={lead.nombre} photoUrl={lead.foto_url} size={88} />
               <div>
                 <h3 className="font-display text-xl font-semibold text-navy">{lead.nombre}</h3>
-                <div className="mb-2 font-mono text-xs font-semibold uppercase tracking-wide text-teal">
+                <div className="mb-2 font-mono text-xs font-semibold uppercase tracking-wide text-teal-ink">
                   {lead.rol_o_especialidad}
                 </div>
                 <p className="max-w-2xl text-sm leading-relaxed text-muted">{lead.bio}</p>
@@ -49,7 +49,7 @@ export function EquipoSection({ equipo }: { equipo: EquipoRow[] }) {
                 </div>
                 <span
                   className="mb-3 inline-block rounded-full px-3 py-1 font-mono text-[11px] font-semibold text-white"
-                  style={{ background: colorHex(t.color) }}
+                  style={{ background: inkHex(t.color) }}
                 >
                   Sala {t.sala}
                 </span>

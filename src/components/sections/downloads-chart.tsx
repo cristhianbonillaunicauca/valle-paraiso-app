@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { DescargaConteoRow, TipoRecurso } from "@/lib/database.types";
-import { colorHex } from "@/lib/colors";
 
 export interface ChartResource {
   tipo: TipoRecurso;
@@ -12,119 +11,113 @@ export interface ChartResource {
   nombre: string;
 }
 
-function truncate(s: string, n: number) {
-  return s.length > n ? `${s.slice(0, n - 1)}…` : s;
-}
+type Status = "loading" | "success" | "error";
 
-export function DownloadsChart({ resources }: { resources: ChartResource[] }) {
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
+/**
+ * "Documentos más descargados". Estados explícitos: esqueleto mientras
+ * carga, error con reintento (si tarda más de 8 s o falla), vacío y éxito.
+ * Nunca muestra "0 descargas" antes de haber verificado los datos reales.
+ * Si el servidor ya trajo los conteos, se muestran de inmediato y luego se
+ * actualizan en vivo. Barras en CSS puro: no carga librerías de gráficas.
+ */
+export function DownloadsChart({ resources, initialCounts }: { resources: ChartResource[]; initialCounts?: Record<string, number> | null }) {
+  const [counts, setCounts] = useState<Record<string, number> | null>(initialCounts ?? null);
+  const [status, setStatus] = useState<Status>(initialCounts ? "success" : "loading");
   const [live, setLive] = useState(false);
+  const timeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const fetchCounts = useCallback(async () => {
-    const supabase = getSupabaseBrowserClient();
-    const { data, error } = await supabase.from("descargas_conteo").select("*");
-    // Igual que en lib/queries.ts: con muchas tablas en el esquema, TS
-    // degrada el tipo de esta vista a `never[]`; se fuerza el tipo real.
-    const rows = (data ?? []) as unknown as DescargaConteoRow[];
-    if (!error) {
-      const map: Record<string, number> = {};
-      for (const row of rows) {
-        map[`${row.recurso_tipo}-${row.recurso_id}`] = row.total;
-      }
-      setCounts(map);
+    clearTimeout(timeout.current);
+    timeout.current = setTimeout(() => setStatus((s) => (s === "loading" ? "error" : s)), 8000);
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data, error } = await supabase.from("descargas_conteo").select("*");
+      if (error) throw error;
+      const rows = (data ?? []) as unknown as DescargaConteoRow[];
+      setCounts(Object.fromEntries(rows.map((r) => [`${r.recurso_tipo}-${r.recurso_id}`, r.total])));
+      setStatus("success");
+    } catch {
+      setStatus((s) => (s === "success" ? s : "error"));
+    } finally {
+      clearTimeout(timeout.current);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
-    // Patrón estándar de "traer datos al montar": fetchCounts es async y
-    // actualiza el estado después del await, no de forma síncrona durante
-    // el efecto — es seguro pese a lo que sugiere esta regla nueva.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCounts();
-    const supabase = getSupabaseBrowserClient();
-    const channel = supabase
-      .channel("descargas-realtime")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "descargas" },
-        () => fetchCounts()
-      )
-      .subscribe((status) => setLive(status === "SUBSCRIBED"));
-
+    let channel: ReturnType<ReturnType<typeof getSupabaseBrowserClient>["channel"]> | null = null;
+    try {
+      const supabase = getSupabaseBrowserClient();
+      channel = supabase
+        .channel("descargas-realtime")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "descargas" }, () => fetchCounts())
+        .subscribe((s) => setLive(s === "SUBSCRIBED"));
+    } catch {
+      /* sin realtime: se mantiene el último conteo */
+    }
     return () => {
-      supabase.removeChannel(channel);
+      clearTimeout(timeout.current);
+      if (channel) getSupabaseBrowserClient().removeChannel(channel);
     };
   }, [fetchCounts]);
 
   const data = resources
-    .map((r) => ({
-      key: `${r.tipo}-${r.id}`,
-      nombre: truncate(r.nombre, 26),
-      nombreCompleto: r.nombre,
-      descargas: counts[`${r.tipo}-${r.id}`] ?? 0,
-      color: r.tipo === "documento" ? colorHex("blue") : colorHex("teal"),
-    }))
-    .sort((a, b) => b.descargas - a.descargas);
-
-  const totalDescargas = data.reduce((sum, d) => sum + d.descargas, 0);
+    .map((r) => ({ key: `${r.tipo}-${r.id}`, nombre: r.nombre, total: counts?.[`${r.tipo}-${r.id}`] ?? 0 }))
+    .sort((a, b) => b.total - a.total);
+  const max = Math.max(1, ...data.map((d) => d.total));
+  const total = data.reduce((s, d) => s + d.total, 0);
 
   return (
-    <div className="rounded-2xl border border-line bg-card p-5 md:p-6">
-      <div className="mb-3 flex items-center justify-between">
-        <span className="font-mono text-xs text-muted">
-          {totalDescargas} descarga{totalDescargas === 1 ? "" : "s"} registrada
-          {totalDescargas === 1 ? "" : "s"}
-        </span>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted">
-          <span
-            className="h-1.5 w-1.5 rounded-full"
-            style={{ background: live ? colorHex("teal") : colorHex("neutro") }}
-          />
-          {live ? "en vivo" : "conectando…"}
-        </span>
+    <div className="rounded-2xl border border-line bg-card p-5 md:p-6" aria-busy={status === "loading"}>
+      <div className="mb-4 flex min-h-5 items-center justify-between gap-3">
+        {status === "success" && total > 0 && (
+          <span className="font-mono text-xs text-muted">{total.toLocaleString("es-CO")} descargas registradas</span>
+        )}
+        {status === "success" && live && (
+          <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[11px] text-teal-ink">
+            <span className="h-1.5 w-1.5 rounded-full bg-teal-ink" aria-hidden /> en vivo
+          </span>
+        )}
       </div>
 
-      {loading ? (
-        <div className="grid h-[260px] place-items-center text-sm text-muted">Cargando datos…</div>
-      ) : (
-        <ResponsiveContainer width="100%" height={Math.max(260, data.length * 34)}>
-          <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24 }}>
-            <CartesianGrid horizontal={false} stroke="#E1E8EA" />
-            <XAxis
-              type="number"
-              allowDecimals={false}
-              tick={{ fontSize: 11, fill: "#5B6478" }}
-              axisLine={{ stroke: "#E1E8EA" }}
-              tickLine={false}
-            />
-            <YAxis
-              type="category"
-              dataKey="nombre"
-              width={190}
-              tick={{ fontSize: 12, fill: "#16213D", fontWeight: 600 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              cursor={{ fill: "rgba(29,48,96,0.06)" }}
-              formatter={(value) => [Number(value), "Descargas"]}
-              labelFormatter={(_, payload) => payload?.[0]?.payload.nombreCompleto ?? ""}
-              contentStyle={{
-                borderRadius: 12,
-                border: "1px solid #E1E8EA",
-                fontSize: 13,
-                fontFamily: "var(--font-body)",
-              }}
-            />
-            <Bar dataKey="descargas" radius={[0, 8, 8, 0]} maxBarSize={22}>
-              {data.map((d) => (
-                <Cell key={d.key} fill={d.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      {status === "loading" && (
+        <div className="space-y-3" aria-label="Cargando datos de descargas">
+          {resources.slice(0, 6).map((r) => (
+            <div key={r.id + r.tipo} className="flex items-center gap-3">
+              <div className="skeleton h-3 w-40 shrink-0" />
+              <div className="skeleton h-5 flex-1" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {status === "error" && (
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <AlertCircle className="text-muted" aria-hidden />
+          <p className="text-sm text-muted">No pudimos cargar las estadísticas en este momento.</p>
+          <button type="button" onClick={() => { setStatus("loading"); fetchCounts(); }} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-strong px-4 text-sm font-semibold text-navy hover:bg-paper-deep">
+            <RefreshCw size={15} aria-hidden /> Reintentar
+          </button>
+        </div>
+      )}
+
+      {status === "success" && total === 0 && (
+        <p className="py-8 text-center text-sm text-muted">Aún no hay descargas registradas. ¡Sé el primero en descargar un recurso!</p>
+      )}
+
+      {status === "success" && total > 0 && (
+        <ol className="space-y-3">
+          {data.map((d) => (
+            <li key={d.key} className="grid grid-cols-1 gap-1 sm:grid-cols-[minmax(0,220px)_1fr] sm:items-center sm:gap-3">
+              <span className="truncate text-sm font-semibold text-ink" title={d.nombre}>{d.nombre}</span>
+              <span className="flex items-center gap-2">
+                <span className="h-5 rounded-md bg-teal-ink/85 transition-[width] duration-700" style={{ width: `${Math.max(2, (d.total / max) * 100)}%` }} aria-hidden />
+                <span className="font-mono text-xs font-semibold text-ink">{d.total.toLocaleString("es-CO")}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
       )}
     </div>
   );
