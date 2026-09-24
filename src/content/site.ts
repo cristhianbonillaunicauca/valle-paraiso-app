@@ -20,6 +20,7 @@ export const NAV_PRINCIPAL = [
 
 export const NAV_MAS = [
   { href: "/certificado", label: "Generar certificado" },
+  { href: "/galeria", label: "El Taller en imágenes" },
   { href: "/memorias", label: "Memorias del programa" },
   { href: "/valle", label: "Valle en Acción" },
   { href: "/#impacto", label: "Impacto" },

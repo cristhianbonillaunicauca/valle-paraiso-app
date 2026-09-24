@@ -17,7 +17,7 @@ export interface Indicador {
 }
 
 export const INDICADORES: Indicador[] = [
-  { id: "docentes", etiqueta: "Docentes participantes en el Taller 1", valor: 360, fuente: "manual" },
+  { id: "docentes", etiqueta: "Docentes participantes en el Taller 1", valor: 374, fuente: "manual" },
   { id: "municipios", etiqueta: "Municipios participantes", valor: 34, fuente: "manual", nota: "Según la base de inscritos del Taller 1" },
   { id: "recursos-creados", etiqueta: "Recursos creados por docentes", valor: null, fuente: "manual" },
   { id: "prompts", etiqueta: "Prompts educativos disponibles", valor: null, fuente: "auto" },
