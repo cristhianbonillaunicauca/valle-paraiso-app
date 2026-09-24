@@ -6,7 +6,10 @@ import { jpegToPdf } from "@/components/certificado/pdf";
 
 const W = 1536;
 const H = 1024;
-const FONDO = ["/_next/image?url=%2Fcertificado%2Ffondo.avif&w=1920&q=90", "/certificado/fondo.avif"];
+/** El fondo va en 8 franjas horizontales de 1536 x 128 (public/certificado/f0..f7.avif). */
+const FRANJAS = 8;
+const ALTO_FRANJA = H / FRANJAS;
+const franja = (i: number) => [`/_next/image?url=%2Fcertificado%2Ff${i}.avif&w=1920&q=90`, `/certificado/f${i}.avif`];
 const LINEA_FECHA = "Desarrollado el día 18 de septiembre de 2026, con una intensidad de 8 horas,";
 
 function cargarImagen(srcs: string[]): Promise<HTMLImageElement> {
@@ -28,11 +31,11 @@ async function dibujar(canvas: HTMLCanvasElement, nombre: string, cedula: string
     document.fonts.load(`400 20px ${fuenteTexto}`, LINEA_FECHA),
     document.fonts.load(`600 20px ${fuenteTexto}`, cedula),
   ]).catch(() => undefined);
-  const fondo = await cargarImagen(FONDO);
+  const franjas = await Promise.all(Array.from({ length: FRANJAS }, (_, i) => cargarImagen(franja(i))));
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(fondo, 0, 0, W, H);
+  franjas.forEach((img, i) => ctx.drawImage(img, 0, i * ALTO_FRANJA, W, ALTO_FRANJA));
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
 
