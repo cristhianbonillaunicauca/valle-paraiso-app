@@ -25,9 +25,28 @@ function cargarImagen(srcs: string[]): Promise<HTMLImageElement> {
   });
 }
 
-async function dibujar(canvas: HTMLCanvasElement, nombre: string, cedula: string, fuenteNombre: string, fuenteTexto: string) {
+/** Rellena un rectángulo interpolando entre la fila de arriba y la de abajo (borra texto del fondo). */
+function borrar(ctx: CanvasRenderingContext2D, x0: number, x1: number, y0: number, y1: number) {
+  const w = x1 - x0;
+  const h = y1 - y0;
+  const arriba = ctx.getImageData(x0, y0 - 1, w, 1).data;
+  const abajo = ctx.getImageData(x0, y1, w, 1).data;
+  const out = ctx.createImageData(w, h);
+  for (let i = 0; i < h; i++) {
+    const t = (i + 1) / (h + 1);
+    for (let x = 0; x < w; x++) {
+      const k = x * 4;
+      const o = (i * w + x) * 4;
+      for (let c = 0; c < 3; c++) out.data[o + c] = arriba[k + c] * (1 - t) + abajo[k + c] * t;
+      out.data[o + 3] = 255;
+    }
+  }
+  ctx.putImageData(out, x0, y0);
+}
+
+async function dibujar(canvas: HTMLCanvasElement, nombre: string, cedula: string, cargo: string | null, fuenteNombre: string, fuenteTexto: string) {
   await Promise.all([
-    document.fonts.load(`74px ${fuenteNombre}`, nombre),
+    document.fonts.load(`84px ${fuenteNombre}`, nombre),
     document.fonts.load(`400 20px ${fuenteTexto}`, LINEA_FECHA),
     document.fonts.load(`600 20px ${fuenteTexto}`, cedula),
   ]).catch(() => undefined);
@@ -39,14 +58,22 @@ async function dibujar(canvas: HTMLCanvasElement, nombre: string, cedula: string
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
 
-  let size = 74;
+  // Gestores: se reemplaza la línea "Participó en el taller de formación docente:".
+  if (cargo) {
+    borrar(ctx, 500, 1040, 531, 561);
+    ctx.font = `400 23.3px ${fuenteTexto}`;
+    ctx.fillStyle = "#203D90";
+    ctx.fillText(`Participó como ${cargo} en el taller de formación docente:`, 766, 553);
+  }
+
+  let size = 84;
   do {
     ctx.font = `${size}px ${fuenteNombre}`;
     if (ctx.measureText(nombre).width <= 860) break;
     size -= 2;
   } while (size > 40);
   ctx.fillStyle = "#0A2870";
-  ctx.fillText(nombre, 768, 476);
+  ctx.fillText(nombre, 768, 474);
 
   ctx.font = `600 20px ${fuenteTexto}`;
   ctx.fillStyle = "#142E78";
@@ -82,7 +109,7 @@ export function GeneradorCertificado({ fuenteNombre, fuenteTexto }: { fuenteNomb
   const [cedula, setCedula] = useState("");
   const [estado, setEstado] = useState<Estado>("form");
   const [error, setError] = useState("");
-  const [datos, setDatos] = useState<{ nombre: string; cedula: string } | null>(null);
+  const [datos, setDatos] = useState<{ nombre: string; cedula: string; cargo: string | null } | null>(null);
   const [preview, setPreview] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
@@ -128,7 +155,7 @@ export function GeneradorCertificado({ fuenteNombre, fuenteTexto }: { fuenteNomb
         return;
       }
       const c = canvasRef.current!;
-      await dibujar(c, json.nombre, json.cedula, fuenteNombre, fuenteTexto);
+      await dibujar(c, json.nombre, json.cedula, json.cargo ?? null, fuenteNombre, fuenteTexto);
       setDatos(json);
       setPreview(c.toDataURL("image/jpeg", 0.85));
       setEstado("listo");
