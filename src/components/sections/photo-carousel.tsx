@@ -11,17 +11,18 @@ import { cn } from "@/lib/utils";
  * pausa (WCAG 2.2.2) y no avanza sola si el usuario pidió reducir movimiento.
  */
 const PHOTOS: { id: string; alt: string }[] = [
-  { id: "169GsSb-AJxDIdryLZEhMgWazEGj9GeRp", alt: "Equipo del proyecto Valle Paraíso Bilingüe" },
-  { id: "1Ug-YvTGgnWcjhmYzEydXViqEaTNwxcIs", alt: "Equipo del proyecto Valle Paraíso Bilingüe" },
-  { id: "1Lm8qAEKxxMumxuA97Vd4gYiaSOKj-j_a", alt: "Territorio del Valle del Cauca" },
-  { id: "1a77CwWiMcy0hcTL7zlvBLD5S6pXqyKki", alt: "Territorio del Valle del Cauca" },
-  { id: "1VRUN4qHyGcrvyWZ0hHz_9iiyDAa0FF4I", alt: "Territorio del Valle del Cauca" },
-  { id: "1QivSgXfjCL9PdEVzo7Yf9Rnl8_D5cJaK", alt: "Territorio del Valle del Cauca" },
-  { id: "1L1724aqwKlCiPdsXTT8X2UwDWlKLO5zq", alt: "Docentes en formación" },
-  { id: "1SB7J4DewCrNpBcxsmwqDZ2pby4oPgMyH", alt: "Docentes en formación" },
-  { id: "1spgdb8He8V4mA5w9_6-cJiCN2hljheWh", alt: "Docentes en formación" },
-  { id: "1Z89jpIs5GWehXcD1txXfsoTNy1jO7nLv", alt: "Docentes en formación" },
-  { id: "1y6URX84NUCD_adZJ2nsr8tnVlaBi3MpH", alt: "Docentes en formación" },
+  { id: "1t3c9H9O-hcmnkVeZSJ5uX0dUZoFoUQUI", alt: "Docentes reunidos frente a la entrada del centro de eventos" },
+  { id: "1ma-QqdHg5fXZHQKFDE9ouO6CZZ0mTfwS", alt: "Mesa de registro de docentes atendida por el equipo del taller" },
+  { id: "1bQtwhXuAADcfBALuS1sEfZqCG4b0a44l", alt: "Integrante del equipo da la bienvenida a una docente" },
+  { id: "1KrR55hPdXvPiIurstbtwezWMaOvBlIPL", alt: "Auditorio principal lleno de docentes durante la plenaria" },
+  { id: "1mZVhoTioC-GNykmBLFgPoRKAlJ393S3b", alt: "Conferencista en el escenario durante la plenaria" },
+  { id: "1ROWJr3rk5hGmo5eVBChedBi470jgmkSd", alt: "Docentes toman apuntes durante la plenaria" },
+  { id: "19kdqdxdFgYhuxp7I4O9hoJ_0QIEbU95k", alt: "Docentes conversan en grupo dentro del auditorio" },
+  { id: "1XS9Z7Sj8nPbCvvKiVlBa9kSxj77xt9mb", alt: "Una docente comparte una idea con el micrófono" },
+  { id: "1YHox3S0G0jyQnA5G-nzHqoexDKdNhpxd", alt: "Facilitadora dirige una actividad en una sala práctica" },
+  { id: "1YSJ1NGokpqWMOAI4bBQAGkK5HIGaxTCg", alt: "Docentes responden una actividad interactiva en sus celulares" },
+  { id: "1fkoKuRpdo9ari6vT2dQVyJFKTR2YAOfV", alt: "Equipo del taller en el escenario durante el cierre" },
+  { id: "1nY3LpjUXMv6aK_TtPBX-ICeRAfKlq456", alt: "Foto grupal de cierre frente al fondo de la Gobernación del Valle" },
 ];
 
 function driveThumb(id: string, width = 1400) {
