@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Award, Sparkles } from "lucide-react";
 
 /** Trazos abstractos de cordillera y río: identidad territorial discreta. */
 function Territorio() {
@@ -36,6 +36,9 @@ export function HeroLab() {
           </Link>
           <Link href="/prompts#generador" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-line-strong bg-card px-7 text-base font-semibold text-navy transition-transform hover:-translate-y-0.5">
             <Sparkles size={18} aria-hidden /> Generar un prompt
+          </Link>
+          <Link href="/certificado" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-line-strong bg-card px-7 text-base font-semibold text-navy transition-transform hover:-translate-y-0.5">
+            <Award size={18} aria-hidden /> Generar certificado
           </Link>
         </div>
         <ol className="mt-10 flex flex-wrap items-center gap-x-2 gap-y-2 font-mono text-[12px] font-semibold uppercase tracking-wide text-muted" aria-label="Ruta de trabajo del laboratorio">
