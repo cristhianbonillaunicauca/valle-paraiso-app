@@ -18,6 +18,7 @@ function previewUrl(it: LibraryItem): string | null {
   if (it.tracking && /\.(docx|xlsx|pptx)$/i.test(it.href)) return officePreviewUrl(it.href);
   if (it.tracking && /\.pdf$/i.test(it.href)) return it.href;
   if (it.href.includes("drive.google.com/file/")) return drivePreviewUrl(it.href);
+  if (it.href.includes("docs.google.com/document/d/")) return it.href.replace(/\/(edit|view)(\?.*)?$/, "/preview");
   return null;
 }
 
@@ -148,6 +149,11 @@ export function Library({ items, counts, initialCat }: { items: LibraryItem[]; c
                           <button type="button" onClick={() => setPreview(it)} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-strong px-4 text-sm font-semibold text-navy hover:bg-paper-deep">
                             <Eye size={15} aria-hidden /> Vista previa
                           </button>
+                        )}
+                        {it.tipo === "Google Docs" && (
+                          <a href={it.href.replace(/\/(edit|view)(\?.*)?$/, "/export?format=docx")} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-strong px-4 text-sm font-semibold text-navy hover:bg-paper-deep">
+                            <Download size={15} aria-hidden /> Descargar Word
+                          </a>
                         )}
                       </>
                     )}
