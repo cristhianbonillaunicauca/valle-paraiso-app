@@ -20,8 +20,8 @@ export async function GET(req: Request) {
     return new Response("Error al consultar el informe", { status: 503 });
   }
   const lineas = [
-    "Fecha y hora (Colombia),Nombre,Cédula,Municipio,Institución",
-    ...filas.map((f) => [f.fecha_hora, f.nombre, f.cedula, f.municipio, f.institucion].map(csv).join(",")),
+    "Fecha y hora (Colombia),Nombre,Cédula,Municipio,Institución,Rol",
+    ...filas.map((f) => [f.fecha_hora, f.nombre, f.cedula, f.municipio, f.institucion, f.rol].map(csv).join(",")),
   ];
   return new Response(lineas.join("\n"), {
     headers: { "Content-Type": "text/csv; charset=utf-8", "Cache-Control": "no-store" },

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const docente = await emitirCertificado(nombre, cedula);
     if (!docente) return NextResponse.json({ error: NO_COINCIDE }, { status: 404 });
     return NextResponse.json(
-      { nombre: nombreParaCertificado(docente, nombre), cedula: formatoCedula(docente.cedula) },
+      { nombre: nombreParaCertificado(docente, nombre), cedula: formatoCedula(docente.cedula), cargo: docente.cargo ?? null },
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch {

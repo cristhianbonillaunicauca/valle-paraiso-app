@@ -19,6 +19,8 @@ export interface DocenteVerificado {
   nombres: string;
   apellidos: string;
   cedula: string;
+  /** "Gestor" o "Gestora"; null para docentes participantes. */
+  cargo: string | null;
 }
 
 export async function emitirCertificado(nombre: string, cedula: string): Promise<DocenteVerificado | null> {
@@ -34,6 +36,7 @@ export interface FilaReporte {
   cedula: string;
   municipio: string | null;
   institucion: string | null;
+  rol: string;
 }
 
 export async function reporteCertificados(token: string): Promise<FilaReporte[]> {
