@@ -75,27 +75,31 @@ html {
   }
 }
 
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-}
+/* Estilos base dentro de @layer base: así las clases utilitarias de
+   Tailwind (text-white, text-navy...) siempre tienen prioridad. */
+@layer base {
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1, h2, h3, h4 {
-  font-family: var(--font-display), ui-serif, Georgia, serif;
-  color: var(--navy);
-  font-weight: 600;
-  line-height: 1.12;
-}
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), ui-serif, Georgia, serif;
+    color: var(--navy);
+    font-weight: 600;
+    line-height: 1.12;
+  }
 
-img { max-width: 100%; display: block; }
-a { color: inherit; }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
 
-::selection {
-  background: var(--teal);
-  color: #fff;
+  ::selection {
+    background: var(--teal);
+    color: #fff;
+  }
 }
 
 /* Foco visible y consistente (WCAG 2.4.7 / 2.4.11). */

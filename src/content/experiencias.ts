@@ -46,4 +46,5 @@ export const EXPERIENCIAS: Experiencia[] = [
 ];
 
 /** Enlace del formulario para postular experiencias. Vacío = aún no existe. */
-export const FORMULARIO_EXPERIENCIAS_URL = "";
+export const FORMULARIO_EXPERIENCIAS_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLScdNWy-Jx5KV9xeFAnG7RTTM35946J34TKK4EXUXbHJ0VUFSA/viewform";
