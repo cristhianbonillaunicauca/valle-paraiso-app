@@ -33,6 +33,7 @@ export interface LibraryItem {
 
 function categoriaPorTitulo(titulo: string, fallback: CategoriaBiblioteca): CategoriaBiblioteca {
   const t = norm(titulo);
+  if (t.startsWith("guia")) return "Guías";
   if (t.includes("prompt")) return "Bancos de prompts";
   if (t.includes("plantilla")) return "Plantillas";
   if (t.includes("presentacion")) return "Presentaciones";
@@ -45,6 +46,7 @@ function categoriaPorTitulo(titulo: string, fallback: CategoriaBiblioteca): Cate
 
 function tipoPorLink(href: string, titulo: string) {
   if (href.includes("/folders/")) return "Carpeta";
+  if (href.includes("docs.google.com/document/")) return "Google Docs";
   const t = norm(titulo);
   if (t.includes("(pdf)")) return "PDF";
   if (t.includes("(powerpoint)")) return "PPTX";
