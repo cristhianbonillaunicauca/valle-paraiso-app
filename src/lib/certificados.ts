@@ -53,15 +53,6 @@ function norm(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
-function lev(a: string, b: string) {
-  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
-  for (let j = 1; j <= b.length; j++) d[0][j] = j;
-  for (let i = 1; i <= a.length; i++)
-    for (let j = 1; j <= b.length; j++)
-      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-  return d[a.length][b.length];
-}
-
 function titulo(w: string) {
   const l = w.toLocaleLowerCase("es");
   if (PARTICULAS.has(l)) return l;
@@ -69,31 +60,23 @@ function titulo(w: string) {
 }
 
 /**
- * Nombre completo tal como está en la base, pero con la ortografía que
- * escribió el docente cuando coincide (tildes, ñ) o cuando corrige un error
- * menor de digitación de la base (p. ej. OSOSRIO -> Osorio).
+ * Nombre completo tal como está en la base (la base es la fuente de verdad).
+ * Del texto escrito por el docente solo se toman las tildes y la ñ cuando la
+ * palabra coincide exactamente salvo por ellas; nunca se reemplaza una
+ * palabra de la base por otra distinta (p. ej. TREJOS no pasa a "Trejo").
  */
 export function nombreParaCertificado(d: DocenteVerificado, escrito: string) {
   const tipeados = escrito.split(/\s+/).filter(Boolean).map((t) => t.replace(/[^\p{L}'-]/gu, "")).filter(Boolean);
   const usados = new Set<number>();
   const base = `${d.nombres} ${d.apellidos}`.split(/\s+/).filter(Boolean);
+  const conTilde = (w: string) => /[^\x00-\x7F]/.test(w);
   return base
     .map((tok) => {
       const n = norm(tok);
-      let idx = tipeados.findIndex((t, i) => !usados.has(i) && norm(t) === n);
+      const idx = tipeados.findIndex((t, i) => !usados.has(i) && norm(t) === n);
       if (idx >= 0) {
         usados.add(idx);
-        // Igual salvo tildes: se conserva la versión que sí las tenga.
-        const conTilde = (w: string) => /[^\x00-\x7F]/.test(w);
         return titulo(conTilde(tipeados[idx]) || !conTilde(tok) ? tipeados[idx] : tok);
-      }
-      if (n.length >= 4) {
-        const max = n.length >= 6 ? 2 : 1;
-        idx = tipeados.findIndex((t, i) => !usados.has(i) && norm(t).length >= 4 && lev(norm(t), n) <= max);
-      }
-      if (idx >= 0) {
-        usados.add(idx);
-        return titulo(tipeados[idx]);
       }
       return titulo(tok);
     })
